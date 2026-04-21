@@ -1,0 +1,50 @@
+{
+  "mcpServers": {
+    "abuseipdb": {
+      "type": "streamable-http",
+      "url": "https://mcp.your-domain.com/abuseipdb/mcp",
+      "headers": {
+        "Authorization": "Basic <platform-token>",
+        "X-AbuseIPDB-Key": "your-abuseipdb-api-key"
+      }
+    },
+    "whois": {
+      "type": "streamable-http",
+      "url": "https://mcp.your-domain.com/whois/mcp",
+      "headers": {
+        "Authorization": "Basic <platform-token>"
+      }
+    },
+    "nvd-cve": {
+      "type": "streamable-http",
+      "url": "https://mcp.your-domain.com/nvd-cve/mcp",
+      "headers": {
+        "Authorization": "Basic <platform-token>",
+        "X-NVD-Api-Key": "your-nvd-api-key"
+      }
+    },
+    "shodan": {
+      "type": "streamable-http",
+      "url": "https://mcp.your-domain.com/shodan/mcp",
+      "headers": {
+        "Authorization": "Basic <platform-token>",
+        "X-Shodan-Key": "your-shodan-api-key"
+      }
+    },
+    "mitre-attack": {
+      "type": "streamable-http",
+      "url": "https://mcp.your-domain.com/mitre-attack/mcp",
+      "headers": {
+        "Authorization": "Basic <platform-token>"
+      }
+    },
+    "vulncheck": {
+      "type": "streamable-http",
+      "url": "https://mcp.your-domain.com/vulncheck/mcp",
+      "headers": {
+        "Authorization": "Basic <platform-token>",
+        "X-VulnCheck-Token": "your-vulncheck-token"
+      }
+    }
+  }
+}

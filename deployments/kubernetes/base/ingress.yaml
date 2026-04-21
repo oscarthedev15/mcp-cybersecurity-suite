@@ -1,0 +1,74 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mcp-ingress
+  namespace: mcp-platform
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: mcp-platform-auth
+    nginx.ingress.kubernetes.io/auth-realm: "MCP Platform - Authentication Required"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Connection '';
+      proxy_cache off;
+      chunked_transfer_encoding on;
+    nginx.ingress.kubernetes.io/proxy-pass-headers: "X-AbuseIPDB-Key,X-Shodan-Key,X-NVD-Api-Key,X-VulnCheck-Token"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - mcp.your-domain.com
+      secretName: mcp-tls
+  rules:
+    - host: mcp.your-domain.com
+      http:
+        paths:
+          - path: /abuseipdb(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: abuseipdb-mcp
+                port:
+                  number: 8008
+          - path: /whois(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: whois-mcp
+                port:
+                  number: 8009
+          - path: /nvd-cve(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: nvd-cve-mcp
+                port:
+                  number: 8010
+          - path: /shodan(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: shodan-mcp
+                port:
+                  number: 8011
+          - path: /mitre-attack(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: mitre-attack-mcp
+                port:
+                  number: 8012
+          - path: /vulncheck(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: vulncheck-mcp
+                port:
+                  number: 8013

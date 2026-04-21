@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mitre-attack-mcp
+  namespace: mcp-platform
+  labels:
+    app: mitre-attack-mcp
+    app.kubernetes.io/part-of: mcp-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mitre-attack-mcp
+  template:
+    metadata:
+      labels:
+        app: mitre-attack-mcp
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - mitre-attack-mcp
+                topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: mitre-attack-mcp
+          image: $(imagevalue)
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8012
+              protocol: TCP
+          env:
+            - name: FASTMCP_PORT
+              value: "8012"
+            - name: FASTMCP_HOST
+              value: "0.0.0.0"
+            - name: STIX_DATA_PATH
+              value: "/app/data/enterprise-attack.json"
+            - name: LOG_LEVEL
+              value: "INFO"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - "ALL"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            tcpSocket:
+              port: 8012
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8012
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 10

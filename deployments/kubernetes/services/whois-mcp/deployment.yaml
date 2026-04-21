@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whois-mcp
+  namespace: mcp-platform
+  labels:
+    app: whois-mcp
+    app.kubernetes.io/part-of: mcp-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whois-mcp
+  template:
+    metadata:
+      labels:
+        app: whois-mcp
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - whois-mcp
+                topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: whois-mcp
+          image: $(imagevalue)
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8009
+              protocol: TCP
+          env:
+            - name: FASTMCP_PORT
+              value: "8009"
+            - name: FASTMCP_HOST
+              value: "0.0.0.0"
+            - name: LOG_LEVEL
+              value: "INFO"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - "ALL"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            tcpSocket:
+              port: 8009
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8009
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 10

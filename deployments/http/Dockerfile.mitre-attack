@@ -1,0 +1,32 @@
+FROM python:3.11.11-slim
+
+LABEL maintainer="oscarthedev15" \
+      description="MITRE ATT&CK MCP server (streamable-http transport)" \
+      org.opencontainers.image.source="https://github.com/oscarthedev15/mcp-cybersecurity-suite"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+
+RUN mkdir -p /app/data && \
+    curl -sSL -o /app/data/enterprise-attack.json \
+    "https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json"
+
+WORKDIR /app/servers/mitre-attack-mcp
+COPY ./servers/mitre-attack-mcp /app/servers/mitre-attack-mcp
+
+RUN uv sync --no-dev --frozen
+
+ENV PATH="/app/servers/mitre-attack-mcp/.venv/bin:$PATH"
+ENV STIX_DATA_PATH="/app/data/enterprise-attack.json"
+
+RUN groupadd -r mcp && useradd -r -g mcp -d /app -s /sbin/nologin mcp \
+    && chown -R mcp:mcp /app
+USER mcp
+
+EXPOSE 8012
+
+CMD ["python", "server.py"]

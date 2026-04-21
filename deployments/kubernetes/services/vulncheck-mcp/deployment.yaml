@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vulncheck-mcp
+  namespace: mcp-platform
+  labels:
+    app: vulncheck-mcp
+    app.kubernetes.io/part-of: mcp-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vulncheck-mcp
+  template:
+    metadata:
+      labels:
+        app: vulncheck-mcp
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - vulncheck-mcp
+                topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: vulncheck-mcp
+          image: $(imagevalue)
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8013
+              protocol: TCP
+          env:
+            - name: FASTMCP_PORT
+              value: "8013"
+            - name: FASTMCP_HOST
+              value: "0.0.0.0"
+            - name: LOG_LEVEL
+              value: "INFO"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - "ALL"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          readinessProbe:
+            tcpSocket:
+              port: 8013
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 8013
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 10

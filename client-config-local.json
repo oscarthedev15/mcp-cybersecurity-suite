@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "abuseipdb": {
+      "type": "streamable-http",
+      "url": "http://localhost:8008/mcp",
+      "headers": {
+        "X-AbuseIPDB-Key": "your-key"
+      }
+    },
+    "whois": {
+      "type": "streamable-http",
+      "url": "http://localhost:8009/mcp"
+    },
+    "nvd-cve": {
+      "type": "streamable-http",
+      "url": "http://localhost:8010/mcp"
+    },
+    "shodan": {
+      "type": "streamable-http",
+      "url": "http://localhost:8011/mcp",
+      "headers": {
+        "X-Shodan-Key": "your-key"
+      }
+    },
+    "mitre-attack": {
+      "type": "streamable-http",
+      "url": "http://localhost:8012/mcp"
+    },
+    "vulncheck": {
+      "type": "streamable-http",
+      "url": "http://localhost:8013/mcp",
+      "headers": {
+        "X-VulnCheck-Token": "your-token"
+      }
+    }
+  }
+}
